@@ -69,3 +69,12 @@ def get_years():
 		pass
 	years.sort()
 	return years
+
+def get_invoices(year):
+	# page size is set to 1024 to avoid paging
+	history = urllib2.urlopen('https://www.tavszamla.hu/tavszamlaportal/Display_bill_history.jsp?UID_21F237B2-C625-4d7e-AB56-7E1BEA4D7039-=%d&dt_pagesize=1024' % year)
+	soup = BeautifulSoup(history.read())
+	vs = {'href': re.compile('^viewStatement')}
+	si = re.compile('=([0-9]+)$');
+	return map(lambda i: int(si.search(i.find('a', vs)['href']).group(1)),
+		soup.findAll('tr', {'class': 'billRow'}))
