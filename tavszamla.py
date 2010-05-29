@@ -29,6 +29,7 @@
 from BeautifulSoup import BeautifulSoup
 import urllib2
 import urllib
+import re
 
 def cookie_init():
 	opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
@@ -52,3 +53,19 @@ def login(username, password, timestamp):
 
 def logout():
 	urllib2.urlopen('https://www.tavszamla.hu/tavszamlaportal/Logout.do')
+
+def get_years():
+	history = urllib2.urlopen('https://www.tavszamla.hu/tavszamlaportal/Display_bill_history.jsp?UID_CA245DB9-7FD4-4ebd-9865-D188CE7863A2-=billhistory')
+	soup = BeautifulSoup(history.read())
+	years = map(lambda i: int(i.string), soup.findAll(attrs={'class': re.compile(r'\bsortBy\b')}))
+	try:
+		select = soup.find(attrs={'name': 'UID_8053544B-9924-432a-B836-D860BD37275D-filter-'})
+		for i in select.findAll('option'):
+			try:
+				years.append(int(i.string))
+			except:
+				pass
+	except:
+		pass
+	years.sort()
+	return years
